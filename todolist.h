@@ -2,11 +2,13 @@
 #define TODOLIST_H
 #include "todo.h"
 #include <QObject>
-#include <QVariant>>
+#include <QVariant>
 
+//Class is used to create a ToDoList object
 class ToDoList : public QObject
 {
     Q_OBJECT
+
 public:
     explicit ToDoList(QObject *parent = nullptr);
 
@@ -22,11 +24,18 @@ public:
     //Returns assignment list
     Q_INVOKABLE QVariantList getAssignmentList();
 
+    //Deletes assignment from vector
+    Q_INVOKABLE void deleteAssignment(int id);
+
 private:
     //Vector for assignments
     QVector<ToDo*> assigmmentList;
 
 signals:
+    //Signals for the QProperties
+    void assignmentAdded();
+    void assignmentDeleted();
+
 
 };
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 
+//Main window
 Window {
     id: root
     width: 640
@@ -16,9 +17,7 @@ Window {
     //Page 1
     property string page1HeaderText: "ToDo"
 
-    //Page2
-
-
+    //Custom page for ToDo app
     ToDoPage{
         anchors.fill: parent
         backgroundColor: bkg

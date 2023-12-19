@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 
+//Page for assignments
 Page {
 
     //Runs when page is completed
@@ -25,6 +26,11 @@ Page {
     property string pageHeaderColor: ""
     property string backgroundColor: ""
     property string headerText: ""
+
+    property string infoTextContent: "\nAdd new assignment above.\n"+
+                                     "Hover to view content.\n"+
+                                     "Rightclick on an assignment to edit.\n"+
+                                     "Leftclick on an assignment to mark as done.\n"
 
     //Defines listmodel
     ListModel {
@@ -70,11 +76,13 @@ Page {
 
                 TextField{
                     id: nameField
+                    anchors.horizontalCenter: parent.horizontalCenter
                     placeholderText: "Category"
                 }
 
                 TextField{
                     id: descriptionField
+                    anchors.horizontalCenter: parent.horizontalCenter
                     placeholderText: "WhatToDo?"
                 }
 
@@ -85,6 +93,7 @@ Page {
                     onClicked: {
                         /*
                         //Sets variables for assignment testing
+
                         var assignment = assignmentList.getAssignment(1);
                         var fullList = assignmentList.getAssignmentList();
 
@@ -93,7 +102,6 @@ Page {
                         console.log(fullList[1].description);
                         console.log(fullList[1].content);
                         console.log(fullList[1].status);
-
 
                         if (assignment) {
                             console.log(assignment.id)
@@ -104,8 +112,31 @@ Page {
                             console.log("Assignment not found");
                         }
 */
-                        listModel.append({"name": nameField.text, "description": descriptionField.text, "toDoID": listModel.count});
+
+                        //Checks if fields are empty
+                        if(nameField.text === "" && descriptionField.text === ""){
+                            infoText.text = "Please fill in both fields";
+                        } else if(nameField.text === ""){
+                            infoText.text = "Please fill in category field";
+                        } else if(descriptionField.text === ""){
+                            infoText.text = "Please fill in description field";
+                        } else {
+                            infoText.text = "";
+                        }
+
+                        //Adds assignment to listmodel
+                        if(nameField.text !== "" && descriptionField.text !== ""){
+                            //Adds new assignment to todo
+                            assignmentList.addAssignment(listModel.count+1,nameField.text, descriptionField.text,false);
+                            listModel.append({"name": nameField.text, "description": descriptionField.text, "toDoID": listModel.count + 1});
+                            infoText.text = infoTextContent
+                        }
                     }
+                }
+                //Sets dynamic info text
+                Text{
+                    id: infoText
+                    text: infoTextContent
                 }
             }
         }
@@ -132,13 +163,22 @@ Page {
                     height: 40
                     color: index % 2 == 0 ? "lightblue" : "lightgray"
 
+                    //Model for assignments
                     Assignment {
                         newcolor: test.color
                         toDoID: model.toDoID
                         description: model.name
                         content: model.description
-                        status: model.status
+                        status: model.status ? true : false
                         anchors.fill: parent
+
+                        //Runs when assignment is added
+                        Component.onCompleted: {
+                            var todoItem = assignmentList.getAssignment(model.toDoID);
+                            if (todoItem) {
+                                bindToDoItem(todoItem);
+                            }
+                        }
                     }
                 }
             }
