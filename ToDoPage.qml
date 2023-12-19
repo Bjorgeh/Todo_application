@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import "./AssignmentModuleFunctions.js" as AssignmentFunctions
 
 //Page for assignments
 Page {
@@ -176,7 +177,7 @@ Page {
                         Component.onCompleted: {
                             var todoItem = assignmentList.getAssignment(model.toDoID);
                             if (todoItem) {
-                                bindToDoItem(todoItem);
+                                AssignmentFunctions.bindToDoItem(todoItem);
                             }
                         }
                     }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import "./AssignmentModuleFunctions.js" as AssignmentFunctions
 
 //Item for Assignments
 Item {
@@ -11,51 +12,17 @@ Item {
     property string newcolor: "white"
     signal customStatusChanged()
 
-    //function to update the image
-    function updateImage() {
-        image.source = status
-                ? "https://static.vecteezy.com/system/resources/thumbnails/011/858/556/small_2x/green-check-mark-icon-with-circle-tick-box-check-list-circle-frame-checkbox-symbol-sign-png.png"
-                : "https://cdn-icons-png.flaticon.com/512/169/169779.png";
-    }
-
-    //Binds the properties of the item to the properties of the toDoItem
-    function bindToDoItem(todoItem) {
-        if (todoItem !== null) {
-            toDoID = todoItem.id;
-            description = todoItem.description;
-            content = todoItem.content;
-            status = todoItem.status;
-
-            todoItem.descriptionChanged.connect(function() {
-                description = todoItem.description;
-            });
-            todoItem.contentChanged.connect(function() {
-                content = todoItem.content;
-            });
-            todoItem.statusChanged.connect(function() {
-                status = todoItem.status;
-                updateImage();
-            });
-        }
-    }
-
-    //Defines function for updating the list model
-    function updateListModel() {
-        listModel.clear();
-        var fullList = assignmentList.getAssignmentList();
-        for (var i = 0; i < fullList.length; i++) {
-            listModel.append({"name": fullList[i].description,
-                                 "description": fullList[i].content,
-                                 "toDoID": fullList[i].id,
-                                 "status": fullList[i].status});
-        }
-    }
-
     //runs when item completed
     Component.onCompleted: {
-        updateImage();
-        assignmentList.assignmentDeleted.connect(updateListModel);
+        AssignmentFunctions.updateImage(image, status);
+        assignmentList.assignmentDeleted.connect(function() {
+            AssignmentFunctions.updateListModel(listModel, assignmentList);
+        });
     }
+
+    //AssignmentItemLayout{
+    //    id: layout
+   //   }
 
     //Rectangle for item
     Rectangle {
@@ -97,9 +64,8 @@ Item {
                 else if (mouseEvent.button === Qt.LeftButton) {
                     var todoItem = assignmentList.getAssignment(toDoID);
                     if (todoItem !== null) {
-                        console.log("Changing status of item ID:", toDoID); // Debug-utskrift
-
-                        console.log("Changed status from: "+todoItem.getStatus())
+                        status = !status;
+                        AssignmentFunctions.updateImage(image, status);
                         todoItem.setStatus(!todoItem.getStatus());
                     }
                 }
@@ -132,64 +98,14 @@ Item {
     }
 
     //Popup for editing assignment
-    Popup {
+    DelEditPopup{
         id: popup
-        width: 200
-        height: 200
-        modal: false
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        //Rectangle for popup
-        Rectangle {
-            width: parent.width
-            height: parent.height
-            color: "lightgrey"
-            border.color: "black"
 
-            //Column with textfields and buttons
-            Column{
-                anchors.centerIn: parent
-                Text {
-                    text: "Edit "+ description
-                }
-                TextField{
-                    id: newDescription
-                    placeholderText: description
-                }
-                TextField{
-                    id: newContent
-                    placeholderText: content
-                }
-                Button {
-                    text: "Save"
-
-                    //When button is clicked, the assignment is updated with the new text
-                    onClicked: {
-                        var todoItem = assignmentList.getAssignment(toDoID);
-                        if (todoItem) {
-
-                            //Uses placeholder text if textfield empty
-                            var descriptionToUpdate = newDescription.text !== "" ? newDescription.text : newDescription.placeholderText;
-                            var contentToUpdate = newContent.text !== "" ? newContent.text : newContent.placeholderText;
-
-                            //Updates assignment
-                            todoItem.setDescription(descriptionToUpdate);
-                            todoItem.setContent(contentToUpdate);
-                        }
-
-                        //Closes popup, prints data and updates model
-                        popup.close();
-                        console.log("New info: " + todoItem.getDescription() + " : " + todoItem.getContent())
-                        updateListModel();
-
-                    }
-                }
-            }
-        }
     }
 
     //Changes image when status is changed
-    onCustomStatusChanged: updateImage()
+    onCustomStatusChanged: AssignmentFunctions.updateImage(image, status)
+
 
 }
